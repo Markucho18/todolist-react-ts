@@ -1,0 +1,5 @@
+[] Escribrir caracteristicas y funciones con detalle
+[] Diagrama Estados y componentes de ReactJS, (utils y hooks y incluso)
+[] Modelo de Base de datos
+[] Diagrama Routing del Expresjs
+[] Croquis diseño CSS
