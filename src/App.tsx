@@ -1,19 +1,70 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
-import { useState } from "react"
+import { BrowserRouter, Routes, Route, Navigate} from "react-router-dom"
+import { useState, useEffect } from "react"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import ProtectedPage from "./pages/ProtectedPage"
+import { verifyToken } from "./utils/verifyToken"
+import { getToken, removeToken } from "./utils/tokenUtils"
 
 const App: React.FC = () => {
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  const [token, setToken] = useState("")
+  const [tokenIsValid, setTokenIsValid] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  const updateToken = async (token: string) =>{
+    console.log("Se ejecuto updateToken()")
+    console.log("Token en updateTOken(): ", token)
+    const newTokenIsValid = await verifyToken(token)
+    if (!newTokenIsValid) {
+      setToken("");
+      removeToken();
+      setTokenIsValid(false);
+    } else {
+      setToken(token);
+      setTokenIsValid(true);
+    }
+    setLoading(false); 
+  }
+
+
+  useEffect(()=>{
+    const checkToken = async () => {
+      const localToken = getToken();
+      console.log(localToken);
+      if (localToken) await updateToken(localToken)
+      else setLoading(false)
+    }
+    checkToken()
+    console.log("Se ha re-renderizado App")
+  },[])
+
+/*   useEffect(() => {
+    if (token) updateToken(token)
+    console.log("Token: ", token)
+  }, [token]); */
+
 
   return (
     <div className="bg-blue-200 h-screen w-screen">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center size-full bg-white text-3xl font-bold">
+          Loading...
+        </div>
+      )}
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<ProtectedPage isAuthenticated={isAuthenticated}/>}></Route>
-          <Route path="/login" element={<LoginPage/>}></Route>
+          <Route path="/" element={
+            tokenIsValid
+            ? <ProtectedPage/> 
+            : <Navigate to="/login"/>
+          }></Route>
+          <Route path="/login" element={
+            tokenIsValid
+            ? <Navigate to="/"/>
+            : <LoginPage handleToken={setToken} tokenIsValid={tokenIsValid}/>
+          }></Route>
           <Route path="/register" element={<RegisterPage/>}></Route>
         </Routes>
       </BrowserRouter>

@@ -1,15 +1,23 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
+import { saveToken } from "../utils/tokenUtils";
 
 const URL = "http://localhost:3000/users/login"
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  handleToken: React.Dispatch<React.SetStateAction<string>>
+  tokenIsValid: boolean
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ handleToken }) => {
+
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    user_password: ""
   })
 
   const [passwordType, setPasswordType] = useState<"text" | "password">("password")
@@ -23,6 +31,8 @@ const LoginPage: React.FC = () => {
       }
     })
   }
+
+  const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,6 +50,17 @@ const LoginPage: React.FC = () => {
       }
       const data = await response.json()
       console.log(data)
+      if(data.token){
+        saveToken(data.token)
+        handleToken(data.token)
+        setError("")
+        navigate("/")
+      }
+      else if(data.notValid){
+        const {notValid} = data
+        if(notValid == "email") setError("That email is not registered")
+        else if(notValid == "password") setError("That password is incorrect")
+      }
     }
     catch(error){
       console.log(`Hubo un error en LoginPage: `, error)
@@ -76,31 +97,30 @@ const LoginPage: React.FC = () => {
                   className="w-full rounded-md p-2"
                   placeholder="iLikeLemons123"
                   type={passwordType}
-                  name="password"
-                  value={formData.password}
+                  name="user_password"
+                  value={formData.user_password}
                   onChange={handleChange}
                 />
                 <span className="absolute right-3 top-3">
                   {passwordType == "password" ? (
-                    <button
-                      className="opacity-60 text-bold size-5"
+                    <GoEye
+                      className="size-5 opacity-60 text-bold select-none cursor-pointer"
                       onClick={()=> setPasswordType("text")}
-                    >
-                      <GoEye className="size-full"/>
-                    </button>
+                    />
                   ) : (
-                    <button
-                      className="opacity-60 text-bold size-5"
+                    <GoEyeClosed
+                      className="size-5 opacity-60 text-bold select-none cursor-pointer"
                       onClick={()=> setPasswordType("password")}
-                    >
-                      <GoEyeClosed className="size-full"/>
-                    </button>
+                    />
                   )}
                 </span>
               </div>
               <Link className="text-blue-700/60 hover:text-blue-700/90 font-semibold text-lg " to={"/register"}>
-                  Create an account
-                </Link>
+                Create an account
+              </Link>
+              {error.length > 0 && (
+                <p className="text-red-500 text-lg font-semibold">{error}</p>
+              )}
             </label>
             <button className="w-full py-2 bg-cyan-400 hover:bg-cyan-600 transition duration-200 ease-in-out text-white text-lg font-bold rounded-lg">
               LOG IN
