@@ -1,19 +1,19 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
 import { saveToken } from "../utils/tokenUtils";
+import { userType } from "../types";
 
 const URL = "http://localhost:3000/users/login"
 
 interface LoginPageProps {
   handleToken: React.Dispatch<React.SetStateAction<string>>
   updateToken: (token: string) => void
+  handleUserData: React.Dispatch<React.SetStateAction<userType | undefined>>
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ handleToken, updateToken }) => {
-
-  const navigate = useNavigate()
+const LoginPage: React.FC<LoginPageProps> = ({ handleToken, updateToken, handleUserData}) => {
 
   const [formData, setFormData] = useState({
     email: "",
@@ -49,12 +49,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ handleToken, updateToken }) => {
         throw new Error(`Hubo un error en el fetch de ${URL}`)
       }
       const data = await response.json()
+      const {token, userData} = data
       console.log(data)
-      if(data.token){
-        saveToken(data.token)
-        handleToken(data.token)
+      if(token){
+        saveToken(token)
+        handleToken(token)
         setError("")
-        updateToken(data.token)
+        updateToken(token)
+        handleUserData(userData)
       }
       else if(data.notValid){
         const {notValid} = data

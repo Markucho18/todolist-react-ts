@@ -1,14 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate} from "react-router-dom"
 import { useState, useEffect } from "react"
 import LoginPage from "./pages/LoginPage"
+import Header from "./components/Header"
+import Sidebar from "./components/Sidebar"
 import RegisterPage from "./pages/RegisterPage"
 import ProtectedPage from "./pages/ProtectedPage"
-import Header from "./components/Header"
 import { verifyToken } from "./utils/verifyToken"
 import { getToken, removeToken } from "./utils/tokenUtils"
+import { userType } from "./types"
 
 const App: React.FC = () => {
 
+  const [userData, setUserData] = useState<userType | undefined>()
   const [token, setToken] = useState("")
   const [tokenIsValid, setTokenIsValid] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -40,15 +43,14 @@ const App: React.FC = () => {
     console.log("Se ha re-renderizado App")
   },[])
 
-/*   useEffect(() => {
-    if (token) updateToken(token)
-    console.log("Token: ", token)
-  }, [token]); */
+  useEffect(() => {
+    console.log("userData: ", userData)
+  }, [userData]);
 
 
   return (
-    <div className="bg-blue-200 h-screen w-screen">
-      {tokenIsValid && <Header /> }
+    <div className="flex flex-col bg-blue-200 w-full h-screen">
+      {tokenIsValid && <Header userData={userData}/> }
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center size-full bg-white">
           <div className="flex gap-2 items-center">
@@ -57,21 +59,28 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={
-            tokenIsValid
-            ? <ProtectedPage/> 
-            : <Navigate to="/login"/>
-          }></Route>
-          <Route path="/login" element={
-            tokenIsValid
-            ? <Navigate to="/"/>
-            : <LoginPage handleToken={setToken} updateToken={updateToken}/>
-          }></Route>
-          <Route path="/register" element={<RegisterPage/>}></Route>
-        </Routes>
-      </BrowserRouter>
+      <main className="flex w-full h-full">
+        {tokenIsValid && <Sidebar />}
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={
+              tokenIsValid
+              ? <ProtectedPage/> 
+              : <Navigate to="/login"/>
+            }></Route>
+            <Route path="/login" element={
+              tokenIsValid
+              ? <Navigate to="/"/>
+              : <LoginPage
+                  handleToken={setToken}
+                  updateToken={updateToken}
+                  handleUserData={setUserData}
+                />
+            }></Route>
+            <Route path="/register" element={<RegisterPage/>}></Route>
+          </Routes>
+        </BrowserRouter>
+      </main>
     </div>
   )
 }
