@@ -1,15 +1,31 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
 
+interface FormData {
+  username: string,
+  email: string,
+  user_password: string
+}
+
+const URL = "http://localhost:3000/users/"
+
 const RegisterPage: React.FC = () => {
 
-  const [formData, setFormData] = useState({
+  const defaultForm = {
     username: "",
     email: "",
-    password: ""
-  })
+    user_password: ""
+  }
+
+  const [formData, setFormData] = useState(defaultForm)
+
+  const [errors, setErrors] = useState<string[]>([])
+  
+  useEffect(()=>{
+    console.log("errors: ", errors)
+  },[errors])
 
   const [passwordType, setPasswordType] = useState<"text" | "password">("password")
 
@@ -23,8 +39,46 @@ const RegisterPage: React.FC = () => {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateData = (formData: FormData) => {
+    const {username, email, user_password} = formData
+    let newErrors = []
+    if(username.length <= 0) newErrors.push("username can't be empty")
+    else if(username.length > 25) newErrors.push("Username is too long")
+    if(email.length <= 0) newErrors.push("email can't be empty")
+    else if(!email.includes("@gmail.com")) newErrors.push("Email must contain @gmail.com")
+    if(user_password.length < 8) newErrors.push("Password must have at least 8 characters")
+    setErrors(newErrors)
+    return newErrors.length == 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const dataIsValid = validateData(formData)
+    if(dataIsValid){
+      try{
+        const response = await fetch(URL, {
+          method: "POST",
+          headers:{
+            "Content-type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        })
+        if(!response.ok){
+          throw new Error("La respuesta no fue ok xdd")
+        }
+        const data = await response.json()
+        if(data.emailInUse) setErrors(["Email is already in use"])
+        else{
+          setFormData(defaultForm)
+          setErrors([])
+          alert("Usuario creado exitosamente")
+        }
+        console.log("Data en RegisterPage: ", data)
+      }
+      catch(error){
+        console.log("Error en RegisterPage fetch: ", error)
+      }
+    }
     console.log("Datos enviados")
   }
 
@@ -68,34 +122,33 @@ const RegisterPage: React.FC = () => {
                   className="w-full rounded-md p-2"
                   placeholder="iLikeLemons123"
                   type={passwordType}
-                  name="password"
-                  value={formData.password}
+                  name="user_password"
+                  value={formData.user_password}
                   onChange={handleChange}
                 />
                 <span className="absolute right-3 top-3">
-                  {passwordType == "password" ? (
-                    <button
-                      className="opacity-60 text-bold size-5"
+                {passwordType == "password" ? (
+                    <GoEye
+                      className="size-5 opacity-60 text-bold select-none cursor-pointer"
                       onClick={()=> setPasswordType("text")}
-                    >
-                      <GoEye className="size-full"/>
-                    </button>
+                    />
                   ) : (
-                    <button
-                      className="opacity-60 text-bold size-5"
+                    <GoEyeClosed
+                      className="size-5 opacity-60 text-bold select-none cursor-pointer"
                       onClick={()=> setPasswordType("password")}
-                    >
-                      <GoEyeClosed className="size-full"/>
-                    </button>
+                    />
                   )}
                 </span>
               </div>
+              {errors.length > 0 && (
+                <p className="text-red-500 text-lg font-semibold">{errors[0]}</p>
+              )}
               <Link className="text-blue-700/60 hover:text-blue-700/90 font-semibold text-lg " to={"/login"}>
-                  Log in
-                </Link>
+                Log in
+              </Link>
             </label>
             <button className="w-full py-2 bg-cyan-400 hover:bg-cyan-600 transition duration-200 ease-in-out text-white text-lg font-bold rounded-lg">
-              LOG IN
+              REGISTER
             </button>
           </form>
         </section>

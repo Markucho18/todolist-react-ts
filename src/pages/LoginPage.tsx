@@ -8,10 +8,10 @@ const URL = "http://localhost:3000/users/login"
 
 interface LoginPageProps {
   handleToken: React.Dispatch<React.SetStateAction<string>>
-  tokenIsValid: boolean
+  updateToken: (token: string) => void
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ handleToken }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ handleToken, updateToken }) => {
 
   const navigate = useNavigate()
 
@@ -54,7 +54,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ handleToken }) => {
         saveToken(data.token)
         handleToken(data.token)
         setError("")
-        navigate("/")
+        updateToken(data.token)
       }
       else if(data.notValid){
         const {notValid} = data
