@@ -117,29 +117,29 @@ const RegisterPage: React.FC = () => {
             </label>
             <label className="flex flex-col gap-2 text-lg">
               <span className="text-xl">Password:</span>
-              <div className="relative w-full">
-                <input
-                  className="w-full rounded-md p-2"
-                  placeholder="iLikeLemons123"
-                  type={passwordType}
-                  name="user_password"
-                  value={formData.user_password}
-                  onChange={handleChange}
-                />
-                <span className="absolute right-3 top-3">
-                {passwordType == "password" ? (
-                    <GoEye
-                      className="size-5 opacity-60 text-bold select-none cursor-pointer"
-                      onClick={()=> setPasswordType("text")}
-                    />
-                  ) : (
-                    <GoEyeClosed
-                      className="size-5 opacity-60 text-bold select-none cursor-pointer"
-                      onClick={()=> setPasswordType("password")}
-                    />
-                  )}
-                </span>
-              </div>
+                <div className="flex w-full bg-white items-center rounded-md overflow-hidden">
+                  <input
+                    className="flex-1 p-2 focus:outline-none"
+                    placeholder="iLikeLemons123"
+                    type={passwordType}
+                    name="user_password"
+                    value={formData.user_password}
+                    onChange={handleChange}
+                  />
+                  <span className="pr-2">
+                    {passwordType == "password" ? (
+                      <GoEye
+                        className="size-5 opacity-60 text-bold select-none cursor-pointer"
+                        onClick={()=> setPasswordType("text")}
+                      />
+                    ) : (
+                      <GoEyeClosed
+                        className="size-5 opacity-60 text-bold select-none cursor-pointer"
+                        onClick={()=> setPasswordType("password")}
+                      />
+                    )}
+                  </span>
+                </div>
               {errors.length > 0 && (
                 <p className="text-red-500 text-lg font-semibold">{errors[0]}</p>
               )}

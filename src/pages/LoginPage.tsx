@@ -3,17 +3,18 @@ import { Link } from "react-router-dom"
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
 import { saveToken } from "../utils/tokenUtils";
-import { userType } from "../types";
+import { saveUserData } from "../utils/userDataUtils";
+import { useUserDataContext } from "../contexts/userDataContext";
 
 const URL = "http://localhost:3000/users/login"
 
 interface LoginPageProps {
-  handleToken: React.Dispatch<React.SetStateAction<string>>
   updateToken: (token: string) => void
-  handleUserData: React.Dispatch<React.SetStateAction<userType | undefined>>
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ handleToken, updateToken, handleUserData}) => {
+const LoginPage: React.FC<LoginPageProps> = ({ updateToken }) => {
+
+  const { setToken } = useUserDataContext()
 
   const [formData, setFormData] = useState({
     email: "",
@@ -50,13 +51,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ handleToken, updateToken, handleU
       }
       const data = await response.json()
       const {token, userData} = data
-      console.log(data)
+      console.log({token, userData})
       if(token){
         saveToken(token)
-        handleToken(token)
+        saveUserData(userData)
+        setToken(token)
         setError("")
         updateToken(token)
-        handleUserData(userData)
       }
       else if(data.notValid){
         const {notValid} = data
@@ -94,16 +95,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ handleToken, updateToken, handleU
             </label>
             <label className="flex flex-col gap-2 text-lg">
               <span className="text-xl">Password:</span>
-              <div className="relative w-full">
+              <div className="flex w-full bg-white items-center rounded-md overflow-hidden">
                 <input
-                  className="w-full rounded-md p-2"
+                  className="flex-1 p-2 focus:outline-none"
                   placeholder="iLikeLemons123"
                   type={passwordType}
                   name="user_password"
                   value={formData.user_password}
                   onChange={handleChange}
                 />
-                <span className="absolute right-3 top-3">
+                <span className="pr-2">
                   {passwordType == "password" ? (
                     <GoEye
                       className="size-5 opacity-60 text-bold select-none cursor-pointer"

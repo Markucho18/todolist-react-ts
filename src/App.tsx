@@ -5,28 +5,34 @@ import Header from "./components/Header"
 import Sidebar from "./components/Sidebar"
 import RegisterPage from "./pages/RegisterPage"
 import ProtectedPage from "./pages/ProtectedPage"
+import UserEditModal from "./components/userEditModal"
 import { verifyToken } from "./utils/verifyToken"
 import { getToken, removeToken } from "./utils/tokenUtils"
-import { userType } from "./types"
+import { clearUserData, getFullUserData } from "./utils/userDataUtils"
+import { useUserDataContext } from "./contexts/userDataContext"
 
 const App: React.FC = () => {
 
-  const [userData, setUserData] = useState<userType | undefined>()
-  const [token, setToken] = useState("")
-  const [tokenIsValid, setTokenIsValid] = useState(false)
+  const {
+    setToken,
+    tokenIsValid, setTokenIsValid,
+    setUserData
+  } = useUserDataContext()
+
   const [loading, setLoading] = useState(true)
 
   const updateToken = async (token: string) =>{
-    console.log("Se ejecuto updateToken()")
-    console.log("Token en updateTOken(): ", token)
     const newTokenIsValid = await verifyToken(token)
+    const newUserData = getFullUserData()
     if (!newTokenIsValid) {
       setToken("");
       removeToken();
+      clearUserData()
       setTokenIsValid(false);
     } else {
       setToken(token);
       setTokenIsValid(true);
+      setUserData(newUserData)
     }
     setLoading(false); 
   }
@@ -43,16 +49,15 @@ const App: React.FC = () => {
     console.log("Se ha re-renderizado App")
   },[])
 
-  useEffect(() => {
-    console.log("userData: ", userData)
-  }, [userData]);
-
+  const [userEditModal, setUserEditModal] = useState(true)
+  const toggleUserEditModal = () => setUserEditModal(prev => !prev)
 
   return (
     <div className="flex flex-col bg-blue-200 w-full h-screen">
-      {tokenIsValid && <Header userData={userData}/> }
+      {userEditModal && <UserEditModal toggleModal={toggleUserEditModal}/>}
+      {tokenIsValid && <Header toggleModal={toggleUserEditModal}/> }
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center size-full bg-white">
+        <div className="absolute inset-0 z-20 flex items-center justify-center size-full bg-white">
           <div className="flex gap-2 items-center">
             <svg className="animate-spin size-8"></svg>
             <span className="text-3xl font-bold">Loading...</span>
@@ -72,9 +77,7 @@ const App: React.FC = () => {
               tokenIsValid
               ? <Navigate to="/"/>
               : <LoginPage
-                  handleToken={setToken}
                   updateToken={updateToken}
-                  handleUserData={setUserData}
                 />
             }></Route>
             <Route path="/register" element={<RegisterPage/>}></Route>

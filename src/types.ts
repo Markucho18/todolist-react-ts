@@ -2,6 +2,6 @@ export interface userType {
   id: number
   username: string
   email: string
-  password: string
+  //user_password: string
   profile_pic: string
 }

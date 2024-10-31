@@ -10,8 +10,8 @@ const NewTaskButton: React.FC = () => {
         <FaPlus className="size-full text-zinc-100 group-hover:text-white"/>
       </button>
       <div
-        style={{boxShadow: "0px 0px 3px black"}}
-        className="absolute top-14 opacity-0 peer-hover:opacity-100 right-8 flex min-w-max rounded-md select-none bg-zinc-700 p-2"
+        style={{boxShadow: "0px 0px 3px black", transitionDelay: "500ms"}}
+        className="absolute top-14 opacity-0 peer-hover:opacity-100 right-8 flex min-w-max rounded-md select-none bg-zinc-700 p-2 transition duration-200 ease-in-out"
       >
         <p className="text-white text-lg">Create new task</p>
       </div>
