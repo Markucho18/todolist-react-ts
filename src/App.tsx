@@ -37,11 +37,9 @@ const App: React.FC = () => {
     setLoading(false); 
   }
 
-
   useEffect(()=>{
     const checkToken = async () => {
       const localToken = getToken();
-      console.log(localToken);
       if (localToken) await updateToken(localToken)
       else setLoading(false)
     }
@@ -49,7 +47,7 @@ const App: React.FC = () => {
     console.log("Se ha re-renderizado App")
   },[])
 
-  const [userEditModal, setUserEditModal] = useState(true)
+  const [userEditModal, setUserEditModal] = useState(false)
   const toggleUserEditModal = () => setUserEditModal(prev => !prev)
 
   return (
