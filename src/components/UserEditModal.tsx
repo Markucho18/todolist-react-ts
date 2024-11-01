@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import UserEditForm from "./UserEditForm";
+import UserPictureReader from "./UserPictureReader";
 import { useUserDataContext } from "../contexts/userDataContext"
 import { MdModeEditOutline } from "react-icons/md";
 import { FaCamera } from "react-icons/fa";
@@ -14,8 +15,8 @@ const UserEditModal: React.FC<UserEditModalProps> = ({ toggleModal }) => {
   const { userData } = useUserDataContext()
 
   const [usernameEdit, setUsernameEdit] = useState(false)
-
   const [passwordEdit, setPasswordEdit] = useState(false)
+  const [pictureEdit, setPictureEdit] = useState(false)
 
   return (
     <div
@@ -42,10 +43,13 @@ const UserEditModal: React.FC<UserEditModalProps> = ({ toggleModal }) => {
             type="password"
             closeForm={() => setPasswordEdit(false)}
           />
+        ) : pictureEdit ? (
+          <UserPictureReader closeForm={() => setPictureEdit(false)}/>
         ) : (
           <>
             <section className="flex flex-col">
               <div
+                onClick={() => setPictureEdit(true)}
                 className="group relative size-36 overflow-hidden border-2 border-slate-500 rounded-full object-cover object-center cursor-pointer"
               >
                 <img src={userData.profile_pic ? userData.profile_pic : ""} alt="profile_pic"/>

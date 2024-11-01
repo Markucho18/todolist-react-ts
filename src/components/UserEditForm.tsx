@@ -35,7 +35,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
   const usernameSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if(formData.old_username !== userData.username) return setError("The username doesn't match") 
-    else if(formData.new_password.length >= 4) return setError("New username can't be empty or short")
+    else if(formData.new_username.length <= 4) return setError("New username can't be empty or short")
     else{
       try{
         const tokenValid = await verifyToken(token)
@@ -53,8 +53,10 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
             throw new Error("La respuesta no esta ok en usernameSubmit")
           }
           const data = await response.json()
-          setError("")
           console.log("data: ", data)
+          setError("")
+          alert("Username updated successfully")
+          closeForm()
         }
         else alert("Your session has expired. Refresh and log in again")
       } catch(error){
@@ -66,8 +68,28 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
   const passwordSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const tokenValid = await verifyToken(token)
+    console.log("URL: ", `${URL}password/${userData.id}`)
     if(tokenValid){
-  
+      try{
+        const response = await fetch(`${URL}password/${userData.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-type": "application/json"
+          },
+          body: JSON.stringify({
+            old_password: formData.old_password,
+            new_password: formData.new_password
+          })
+        })
+        if(!response.ok) throw new Error("La respuesta no esta ok en usernameSubmit")
+        const data = await response.json()
+        if(data.passwordIsValid === false) return setError("Old password is incorrect")
+        if(formData.new_password.length < 8) return setError("New password must have at least 8 characters")
+        alert("password updated successfully")
+        closeForm()
+      } catch(error){
+        console.log("Hubo un error en passwordSubmit", error)
+      }
     } else alert("Your session has expired. Refresh and log in again")
   }
   
