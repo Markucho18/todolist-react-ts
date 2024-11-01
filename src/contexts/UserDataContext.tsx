@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { userType } from "../types";
+//import { verifyToken, removeToken } from "../utils/verifyToken";
+//import { getFullUserData, clearUserData } from "../utils/userDataUtils";
 
 interface UserDataContext {
   token: string
@@ -32,6 +34,7 @@ export const UserDataContextProvider:React.FC<UserDataContextProps> = ({ childre
   useEffect(()=>{
     console.log("userData: ", userData)
   },[userData])
+  
 
   return (
     <UserDataContext.Provider value={{

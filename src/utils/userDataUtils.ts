@@ -1,5 +1,9 @@
 import { userType } from "../types"
 
+export const setUserId = (value: string) => localStorage.setItem("id", value)
+export const setUsername = (value: string) => localStorage.setItem("username", value)
+export const setProfilePic = (value: string) => localStorage.setItem("profile_pic", value)
+
 export const saveUserData = ( userData: userType) => {
   localStorage.setItem("id", userData.id.toString())
   localStorage.setItem("username", userData.username)

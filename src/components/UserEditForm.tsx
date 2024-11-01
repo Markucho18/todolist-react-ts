@@ -1,6 +1,7 @@
 import React, { FormEvent, useState } from "react"
 import { useUserDataContext } from "../contexts/userDataContext"
 import { verifyToken } from "../utils/verifyToken"
+import { setUsername } from "../utils/userDataUtils"
 
 const URL = "http://localhost:3000/users/"
 
@@ -55,6 +56,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
           const data = await response.json()
           console.log("data: ", data)
           setError("")
+          setUsername(formData.new_username)
           alert("Username updated successfully")
           closeForm()
         }
@@ -71,6 +73,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
     console.log("URL: ", `${URL}password/${userData.id}`)
     if(tokenValid){
       try{
+        if(formData.new_password.length < 8) return setError("New password must have at least 8 characters")
         const response = await fetch(`${URL}password/${userData.id}`, {
           method: "PUT",
           headers: {
@@ -84,7 +87,6 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
         if(!response.ok) throw new Error("La respuesta no esta ok en usernameSubmit")
         const data = await response.json()
         if(data.passwordIsValid === false) return setError("Old password is incorrect")
-        if(formData.new_password.length < 8) return setError("New password must have at least 8 characters")
         alert("password updated successfully")
         closeForm()
       } catch(error){

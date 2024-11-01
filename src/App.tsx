@@ -27,7 +27,7 @@ const App: React.FC = () => {
     if (!newTokenIsValid) {
       setToken("");
       removeToken();
-      clearUserData()
+      clearUserData();
       setTokenIsValid(false);
     } else {
       setToken(token);
