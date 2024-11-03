@@ -1,7 +1,5 @@
 import React, { FormEvent, useState } from "react"
 import { useUserDataContext } from "../contexts/userDataContext"
-import { verifyToken } from "../utils/verifyToken"
-import { setUsername } from "../utils/userDataUtils"
 
 const URL = "http://localhost:3000/users/"
 
@@ -12,7 +10,7 @@ interface UserEditFormProps {
 
 const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
 
-  const { userData, token } = useUserDataContext()
+  const { userData, checkToken, fetchUserData } = useUserDataContext()
 
   const [formData, setFormData] = useState({
     old_username: "",
@@ -39,15 +37,16 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
     else if(formData.new_username.length <= 4) return setError("New username can't be empty or short")
     else{
       try{
-        const tokenValid = await verifyToken(token)
+        const tokenValid = await checkToken()
+        console.log({ username: formData.new_username})
         if(tokenValid){
-          const response = await fetch(`${URL}${userData.id}`, {
+          const response = await fetch(`${URL}username/${userData.id}`, {
             method: "PUT",
-            headers: {
+            headers:{
               "Content-type": "application/json"
             },
             body: JSON.stringify({
-              "username": formData.new_username
+              username: formData.new_username
             })
           })
           if(!response.ok){
@@ -56,11 +55,10 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
           const data = await response.json()
           console.log("data: ", data)
           setError("")
-          setUsername(formData.new_username)
+          fetchUserData()
           alert("Username updated successfully")
           closeForm()
         }
-        else alert("Your session has expired. Refresh and log in again")
       } catch(error){
         console.log("There was an error in usernameSubmit: ", error)
       }
@@ -69,7 +67,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
   
   const passwordSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    const tokenValid = await verifyToken(token)
+    const tokenValid = await checkToken()
     console.log("URL: ", `${URL}password/${userData.id}`)
     if(tokenValid){
       try{
@@ -92,7 +90,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
       } catch(error){
         console.log("Hubo un error en passwordSubmit", error)
       }
-    } else alert("Your session has expired. Refresh and log in again")
+    }
   }
   
 

@@ -6,44 +6,26 @@ import Sidebar from "./components/Sidebar"
 import RegisterPage from "./pages/RegisterPage"
 import ProtectedPage from "./pages/ProtectedPage"
 import UserEditModal from "./components/userEditModal"
-import { verifyToken } from "./utils/verifyToken"
-import { getToken, removeToken } from "./utils/tokenUtils"
-import { clearUserData, getFullUserData } from "./utils/userDataUtils"
 import { useUserDataContext } from "./contexts/userDataContext"
 
 const App: React.FC = () => {
 
   const {
-    setToken,
-    tokenIsValid, setTokenIsValid,
-    setUserData
+    tokenData,
+    checkToken,
+    updateUserData,
   } = useUserDataContext()
 
   const [loading, setLoading] = useState(true)
 
-  const updateToken = async (token: string) =>{
-    const newTokenIsValid = await verifyToken(token)
-    const newUserData = getFullUserData()
-    if (!newTokenIsValid) {
-      setToken("");
-      removeToken();
-      clearUserData();
-      setTokenIsValid(false);
-    } else {
-      setToken(token);
-      setTokenIsValid(true);
-      setUserData(newUserData)
-    }
-    setLoading(false); 
-  }
-
   useEffect(()=>{
-    const checkToken = async () => {
-      const localToken = getToken();
-      if (localToken) await updateToken(localToken)
-      else setLoading(false)
+    const validateTokenOnInit = async() => {
+      const tokenIsValid = await checkToken()
+      console.log("tokenIsValid en app: ", tokenIsValid)
+      if(tokenIsValid) updateUserData()
+      setLoading(false)
     }
-    checkToken()
+    validateTokenOnInit()
     console.log("Se ha re-renderizado App")
   },[])
 
@@ -53,7 +35,7 @@ const App: React.FC = () => {
   return (
     <div className="flex flex-col bg-blue-200 w-full h-screen">
       {userEditModal && <UserEditModal toggleModal={toggleUserEditModal}/>}
-      {tokenIsValid && <Header toggleModal={toggleUserEditModal}/> }
+      {tokenData.valid && <Header toggleModal={toggleUserEditModal}/> }
       {loading && (
         <div className="absolute inset-0 z-20 flex items-center justify-center size-full bg-white">
           <div className="flex gap-2 items-center">
@@ -63,20 +45,18 @@ const App: React.FC = () => {
         </div>
       )}
       <main className="flex w-full h-full">
-        {tokenIsValid && <Sidebar />}
+        {tokenData.valid && <Sidebar />}
         <BrowserRouter>
           <Routes>
             <Route path="/" element={
-              tokenIsValid
+              tokenData.valid
               ? <ProtectedPage/> 
               : <Navigate to="/login"/>
             }></Route>
             <Route path="/login" element={
-              tokenIsValid
+              tokenData.valid
               ? <Navigate to="/"/>
-              : <LoginPage
-                  updateToken={updateToken}
-                />
+              : <LoginPage />
             }></Route>
             <Route path="/register" element={<RegisterPage/>}></Route>
           </Routes>

@@ -1,11 +1,9 @@
-import { useNavigate } from "react-router-dom"
+import { useUserDataContext } from "../contexts/userDataContext"
 
 interface ProtectedPageProps{
 }
 
 const ProtectedPage: React.FC<ProtectedPageProps> = ({ }) => {
-
-  const navigate = useNavigate()
 
   return (
     <div>

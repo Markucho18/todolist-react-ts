@@ -2,19 +2,13 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
-import { saveToken } from "../utils/tokenUtils";
-import { saveUserData } from "../utils/userDataUtils";
 import { useUserDataContext } from "../contexts/userDataContext";
 
 const URL = "http://localhost:3000/users/login"
 
-interface LoginPageProps {
-  updateToken: (token: string) => void
-}
+const LoginPage: React.FC = () => {
 
-const LoginPage: React.FC<LoginPageProps> = ({ updateToken }) => {
-
-  const { setToken } = useUserDataContext()
+  const { setTokenData, setUserData, checkToken } = useUserDataContext()
 
   const [formData, setFormData] = useState({
     email: "",
@@ -53,11 +47,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ updateToken }) => {
       const {token, userData} = data
       console.log({token, userData})
       if(token){
-        saveToken(token)
-        saveUserData(userData)
-        setToken(token)
+        setTokenData(prev => {
+          return {...prev, value: token}
+        })
+        setUserData(userData)
         setError("")
-        updateToken(token)
+        const checkTokenTimeOut = setTimeout(async()=>{
+          await checkToken()
+          clearTimeout(checkTokenTimeOut)
+        },2000)
       }
       else if(data.notValid){
         const {notValid} = data
@@ -72,7 +70,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ updateToken }) => {
   }
 
   return (
-    <main className="flex h-full w-full justify-center items- center">
+    <main className="flex h-full w-full justify-center items- center obje">
       <div
         style={{ boxShadow: "0px 0px 3px black" }}
         className="flex rounded-lg overflow-hidden w-full md:w-[80%] my-auto"

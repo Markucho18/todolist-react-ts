@@ -5,3 +5,8 @@ export interface userType {
   //user_password: string
   profile_pic: string
 }
+
+export interface TokenDataType {
+  value: string
+  valid: boolean
+}

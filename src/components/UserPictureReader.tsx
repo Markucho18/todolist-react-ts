@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { MdCloudUpload } from "react-icons/md";
-import { setProfilePic } from "../utils/userDataUtils";
-import { verifyToken } from "../utils/verifyToken";
 import { useUserDataContext } from "../contexts/userDataContext";
 
 const URL = "http://localhost:3000/users/picture"
@@ -12,7 +10,7 @@ interface UserPictureReaderProps {
 
 const UserPictureReader: React.FC<UserPictureReaderProps> = ({ closeForm }) => {
 
-  const { token } = useUserDataContext()
+  const { tokenData, fetchUserData, checkToken } = useUserDataContext()
 
   const [preview, setPreview] = useState("")
 
@@ -52,26 +50,32 @@ const UserPictureReader: React.FC<UserPictureReaderProps> = ({ closeForm }) => {
   }
 
   const handleSubmit = async () => {
-    const tokenIsValid = await verifyToken(token)
+    const tokenIsValid = await checkToken()
     if(tokenIsValid){
-      if(!file) setError("No file selected")
+      if(!file){
+        setError("No file selected")
+        return
+      }
       const formData = new FormData()
       formData.append("profile_pic", file as File)
       try{
         const response = await fetch(URL, {
           method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${tokenData.value}`
+          },
           body: formData
         })
-        console.log(response)
         if(!response.ok) throw new Error("La respuesta no esta ok xd")
         const data = await response.json()
-        //setProfilePic()
-        console.log("data: ", data)
+        if(data) console.log("data: ", data)
+        else console.log("No hay data xd")
+        fetchUserData()
       } catch(error){
         console.log("Hubo un error en handleSubmit: ", error)
         setError("Failed to upload image")
       }
-    } else alert("Your session has expired, refresh and log in again")
+    }
   }
 
   return (
