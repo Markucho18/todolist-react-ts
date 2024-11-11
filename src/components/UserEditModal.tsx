@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import UserEditForm from "./UserEditForm";
 import UserPictureReader from "./UserPictureReader";
-import { useUserDataContext } from "../contexts/userDataContext"
 import { MdModeEditOutline } from "react-icons/md";
 import { FaCamera } from "react-icons/fa";
 import { MdOutlineCancel } from "react-icons/md";
@@ -11,8 +10,6 @@ interface UserEditModalProps {
 }
 
 const UserEditModal: React.FC<UserEditModalProps> = ({ toggleModal }) => {
-
-  const { userData } = useUserDataContext()
 
   const [usernameEdit, setUsernameEdit] = useState(false)
   const [passwordEdit, setPasswordEdit] = useState(false)
@@ -52,7 +49,7 @@ const UserEditModal: React.FC<UserEditModalProps> = ({ toggleModal }) => {
                 onClick={() => setPictureEdit(true)}
                 className="group relative size-36 overflow-hidden border-2 border-slate-500 rounded-full object-cover object-center cursor-pointer"
               >
-                <img src={userData.profile_pic ? userData.profile_pic : ""} alt="profile_pic"/>
+                <img src={localStorage.getItem("profile_pic") ?? ""} alt="profile_pic"/>
                 <div className="absolute inset-0 size-full flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition duration-200 ease-in-out">
                   <FaCamera className="size-12 text-[#5FA6A5]"/>
                 </div>
@@ -61,12 +58,12 @@ const UserEditModal: React.FC<UserEditModalProps> = ({ toggleModal }) => {
             <section className="flex flex-col gap-2 pt-2">
               <div className="flex items-center gap-2">
                 <p className="text-xl">Email: </p>
-                <p className="text-xl opacity-80">{userData.email}</p>
+                <p className="text-xl opacity-80">{localStorage.getItem("email")}</p>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex gap-2 items-center">
                   <p className="text-xl">Username: </p>
-                  <p className="text-xl opacity-80">{userData.username}</p>
+                  <p className="text-xl opacity-80">{localStorage.getItem("username")}</p>
                 </div>
                 <button
                   onClick={() => setUsernameEdit(true)}

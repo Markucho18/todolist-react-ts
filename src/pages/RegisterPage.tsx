@@ -2,14 +2,13 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
+import { buildErrorMessage } from "vite";
 
 interface FormData {
   username: string,
   email: string,
   user_password: string
 }
-
-const URL = "http://localhost:3000/users/"
 
 const RegisterPage: React.FC = () => {
 
@@ -53,6 +52,7 @@ const RegisterPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const URL = "http://localhost:3000/users/register"
     const dataIsValid = validateData(formData)
     if(dataIsValid){
       try{
@@ -63,20 +63,16 @@ const RegisterPage: React.FC = () => {
           },
           body: JSON.stringify(formData)
         })
-        if(!response.ok){
-          throw new Error("La respuesta no fue ok xdd")
-        }
+        if(response.status === 401) return setErrors(["Email is already in use"])
+        if(response.status !== 200) throw new Error()
         const data = await response.json()
-        if(data.emailInUse) setErrors(["Email is already in use"])
-        else{
-          setFormData(defaultForm)
-          setErrors([])
-          alert("Usuario creado exitosamente")
-        }
-        console.log("Data en RegisterPage: ", data)
+        setFormData(defaultForm)
+        setErrors([])
+        alert("User registered succesfully")
+        console.log({data})
       }
       catch(error){
-        console.log("Error en RegisterPage fetch: ", error)
+        console.log("Register error")
       }
     }
     console.log("Datos enviados")

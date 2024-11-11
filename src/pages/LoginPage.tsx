@@ -2,13 +2,13 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
-import { useUserDataContext } from "../contexts/userDataContext";
+import { fetchUserData } from "../utils/fetchUserData";
 
-const URL = "http://localhost:3000/users/login"
+interface LoginPageProps{
+  setTokenIsValid: React.Dispatch<React.SetStateAction<boolean>>
+}
 
-const LoginPage: React.FC = () => {
-
-  const { setTokenData, setUserData, checkToken } = useUserDataContext()
+const LoginPage: React.FC<LoginPageProps> = ({setTokenIsValid}) => {
 
   const [formData, setFormData] = useState({
     email: "",
@@ -32,39 +32,28 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log(formData)
+    const URL = "http://localhost:3000/users/login"
     try{
       const response = await fetch(URL,{
         method: "POST",
         headers: {
           "Content-type": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify(formData)
       })
-      if(!response.ok){
-        throw new Error(`Hubo un error en el fetch de ${URL}`)
-      }
       const data = await response.json()
-      const {token, userData} = data
-      console.log({token, userData})
-      if(token){
-        setTokenData(prev => {
-          return {...prev, value: token}
-        })
-        setUserData(userData)
-        setError("")
-        const checkTokenTimeOut = setTimeout(async()=>{
-          await checkToken()
-          clearTimeout(checkTokenTimeOut)
-        },2000)
-      }
-      else if(data.notValid){
-        const {notValid} = data
-        if(notValid == "email") setError("That email is not registered")
-        else if(notValid == "password") setError("That password is incorrect")
-      }
+      if(response.status === 404) return setError("The email is not registered")
+      if(response.status === 401) return setError("The password is incorrect")
+      if(response.status !== 200) throw new Error("Server error")
+      if(data.userId) localStorage.setItem("userId", data.userId)
+      setError("")
+      await fetchUserData()
+      setTokenIsValid(true)
     }
     catch(error){
-      console.log(`Hubo un error en LoginPage: `, error)
+      if(error instanceof Error) console.log(error.message)
+      else console.log("Error has ocurred", error)
     }
     console.log("Datos enviados")
   }

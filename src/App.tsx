@@ -6,27 +6,23 @@ import Sidebar from "./components/Sidebar"
 import RegisterPage from "./pages/RegisterPage"
 import ProtectedPage from "./pages/ProtectedPage"
 import UserEditModal from "./components/userEditModal"
-import { useUserDataContext } from "./contexts/userDataContext"
+import { validateToken } from "./utils/validateToken"
+import { fetchUserData } from "./utils/fetchUserData"
 
 const App: React.FC = () => {
 
-  const {
-    tokenData,
-    checkToken,
-    updateUserData,
-  } = useUserDataContext()
+  const [tokenIsValid, setTokenIsValid] = useState(false)
 
   const [loading, setLoading] = useState(true)
 
   useEffect(()=>{
-    const validateTokenOnInit = async() => {
-      const tokenIsValid = await checkToken()
-      console.log("tokenIsValid en app: ", tokenIsValid)
-      if(tokenIsValid) updateUserData()
+    const checkToken = async () => {
+      const newTokenIsValid =  await validateToken()
+      setTokenIsValid(newTokenIsValid)
+      if(newTokenIsValid) await fetchUserData()
       setLoading(false)
     }
-    validateTokenOnInit()
-    console.log("Se ha re-renderizado App")
+    checkToken()
   },[])
 
   const [userEditModal, setUserEditModal] = useState(false)
@@ -35,7 +31,7 @@ const App: React.FC = () => {
   return (
     <div className="flex flex-col bg-blue-200 w-full h-screen">
       {userEditModal && <UserEditModal toggleModal={toggleUserEditModal}/>}
-      {tokenData.valid && <Header toggleModal={toggleUserEditModal}/> }
+      {tokenIsValid && <Header toggleModal={toggleUserEditModal}/> }
       {loading && (
         <div className="absolute inset-0 z-20 flex items-center justify-center size-full bg-white">
           <div className="flex gap-2 items-center">
@@ -45,18 +41,18 @@ const App: React.FC = () => {
         </div>
       )}
       <main className="flex w-full h-full">
-        {tokenData.valid && <Sidebar />}
+        {tokenIsValid && <Sidebar setTokenIsValid={setTokenIsValid}/>}
         <BrowserRouter>
           <Routes>
             <Route path="/" element={
-              tokenData.valid
+              tokenIsValid
               ? <ProtectedPage/> 
               : <Navigate to="/login"/>
             }></Route>
             <Route path="/login" element={
-              tokenData.valid
+              tokenIsValid
               ? <Navigate to="/"/>
-              : <LoginPage />
+              : <LoginPage setTokenIsValid={setTokenIsValid}/>
             }></Route>
             <Route path="/register" element={<RegisterPage/>}></Route>
           </Routes>

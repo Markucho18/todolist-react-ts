@@ -32,7 +32,7 @@ export const getFullUserData: userDataReturn = () => {
 }
 
 export const clearUserData = () => {
-  localStorage.removeItem("id")
+  localStorage.removeItem("userId")
   localStorage.removeItem("username")
   localStorage.removeItem("email")
   localStorage.removeItem("profile_pic")

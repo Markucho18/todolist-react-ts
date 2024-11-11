@@ -1,6 +1,5 @@
 import SearchBar from "./SearchBar"
 import NewTaskButton from "./NewTaskButton"
-import { useUserDataContext } from "../contexts/userDataContext"
 import { MdModeEditOutline } from "react-icons/md";
 
 interface HeaderProps {
@@ -9,8 +8,6 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ toggleModal }) => {
 
-  const { userData } = useUserDataContext()
-
   return(
     <header className="flex items-center justify-center gap-4 w-full bg-zinc-700 px-2 sm:px-8 lg:px-12 pt-2 pb-4">
       <section className="group relative flex flex-1 items-center p-2">
@@ -18,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ toggleModal }) => {
           onClick={toggleModal}
           className="peer size-20 overflow-hidden rounded-full object-cover object-center cursor-pointer"
         >
-          <img src={userData.profile_pic ? userData.profile_pic : ""} alt="profile_pic"/>
+          <img src={localStorage.getItem("profile_pic") ?? ""} alt="profile_pic"/>
         </div>
         <div
           onClick={toggleModal}
