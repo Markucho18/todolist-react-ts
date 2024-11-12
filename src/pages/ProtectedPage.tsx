@@ -1,5 +1,3 @@
-import { useUserDataContext } from "../contexts/userDataContext"
-
 interface ProtectedPageProps{
 }
 

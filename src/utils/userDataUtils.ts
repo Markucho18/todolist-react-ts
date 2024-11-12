@@ -1,4 +1,4 @@
-import { userType } from "../types"
+/* import { userType } from "../types"
 
 export const saveUserData = ( userData: userType) => {
   localStorage.setItem("id", userData.id.toString())
@@ -29,7 +29,7 @@ export const getFullUserData: userDataReturn = () => {
     profile_pic: getUserProfilePic()
   }
   return newUserData
-}
+} */
 
 export const clearUserData = () => {
   localStorage.removeItem("userId")

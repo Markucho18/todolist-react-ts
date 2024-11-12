@@ -1,7 +1,7 @@
 import React, { FormEvent, useState } from "react"
-import { useUserDataContext } from "../contexts/userDataContext"
-
-const URL = "http://localhost:3000/users/"
+import { GoEye } from "react-icons/go";
+import { GoEyeClosed } from "react-icons/go";
+import { fetchUserData } from "../utils/fetchUserData"
 
 interface UserEditFormProps {
   type: "username" | "password"
@@ -9,8 +9,6 @@ interface UserEditFormProps {
 }
 
 const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
-
-  const { userData, checkToken, fetchUserData } = useUserDataContext()
 
   const [formData, setFormData] = useState({
     old_username: "",
@@ -31,65 +29,62 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
 
   const [error, setError] = useState("")
 
+  const [passwordType, setPasswordType] = useState<"text" | "password">("password")
+
   const usernameSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if(formData.old_username !== userData.username) return setError("The username doesn't match") 
-    else if(formData.new_username.length <= 4) return setError("New username can't be empty or short")
-    else{
-      try{
-        const tokenValid = await checkToken()
-        console.log({ username: formData.new_username})
-        if(tokenValid){
-          const response = await fetch(`${URL}username/${userData.id}`, {
+    const currentUsername = localStorage.getItem("username")
+    if(currentUsername){
+      if(formData.old_username !== currentUsername) return setError("The username doesn't match") 
+      else if(formData.new_username.length <= 4) return setError("New username can't be empty or short")
+      else{
+        try{
+          console.log({ username: formData.new_username})
+          const response = await fetch(`http://localhost:3000/users/edit-username`, {
             method: "PUT",
+            credentials: "include",
             headers:{
               "Content-type": "application/json"
             },
-            body: JSON.stringify({
-              username: formData.new_username
-            })
+            body: JSON.stringify(formData)
           })
-          if(!response.ok){
-            throw new Error("La respuesta no esta ok en usernameSubmit")
-          }
           const data = await response.json()
+          if(!response.ok) throw new Error(data.message)
           console.log("data: ", data)
           setError("")
-          fetchUserData()
+          await fetchUserData()
           alert("Username updated successfully")
           closeForm()
+        } catch(error){
+          if(error instanceof Error) console.log(error.message)
+          else console.log("username edit error", error)
         }
-      } catch(error){
-        console.log("There was an error in usernameSubmit: ", error)
       }
     }
+    else console.log("No username in localStorage")
   }
   
   const passwordSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    const tokenValid = await checkToken()
-    console.log("URL: ", `${URL}password/${userData.id}`)
-    if(tokenValid){
-      try{
-        if(formData.new_password.length < 8) return setError("New password must have at least 8 characters")
-        const response = await fetch(`${URL}password/${userData.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-type": "application/json"
-          },
-          body: JSON.stringify({
-            old_password: formData.old_password,
-            new_password: formData.new_password
-          })
-        })
-        if(!response.ok) throw new Error("La respuesta no esta ok en usernameSubmit")
-        const data = await response.json()
-        if(data.passwordIsValid === false) return setError("Old password is incorrect")
-        alert("password updated successfully")
-        closeForm()
-      } catch(error){
-        console.log("Hubo un error en passwordSubmit", error)
-      }
+    try{
+      if(formData.new_password.length < 8) return setError("New password must have at least 8 characters")
+      const response = await fetch(`http://localhost:3000/users/edit-password`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      })
+      const data = await response.json()
+      if(response.status === 401) setError("Old password is incorrect")
+      if(response.status !== 200) throw new Error(data.message)
+      await fetchUserData()
+      alert("password updated successfully")
+      closeForm()
+    } catch(error){
+      if(error instanceof Error) console.log(error.message)
+      else console.log("username edit error", error)
     }
   }
   
@@ -105,7 +100,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
           style={{boxShadow: "0px 0px 3px black"}}
           className="flex-1 rounded-md p-2 focus:outline-none"
           placeholder={`Enter your old ${type}`}
-          type="text"
+          type={type == "password" ? passwordType : "text"}
           name={`old_${type}`}
           value={formData[`old_${type}`]}
           onChange={handleChange}
@@ -117,16 +112,32 @@ const UserEditForm: React.FC<UserEditFormProps> = ({ type, closeForm }) => {
           style={{boxShadow: "0px 0px 3px black"}}
           className="flex-1 rounded-md p-2 focus:outline-none"
           placeholder={`Enter your new ${type}`}
-          type="text"
+          type={type == "password" ? passwordType : "text"}
           name={`new_${type}`}
           value={formData[`new_${type}`]}
           onChange={handleChange}
         />
+        
       </label>
       {error.length > 0 && (
         <span className="text-red-500 text-xl">{error}</span>
       )}
       <div className="flex flex-1 justify-end gap-4 pt-2">
+        {type == "password" && (
+          <span className="flex items-center pr-2 h-full">
+            {passwordType == "password" ? (
+              <GoEye
+                className="size-8 opacity-60 text-bold select-none cursor-pointer"
+                onClick={()=> setPasswordType("text")}
+              />
+            ) : (
+              <GoEyeClosed
+                className="size-8 opacity-60 text-bold select-none cursor-pointer"
+                onClick={()=> setPasswordType("password")}
+              />
+            )}
+          </span>
+        )}
         <button
           type="button"
           onClick={closeForm}

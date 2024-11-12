@@ -1,16 +1,12 @@
 import React, { useState } from "react";
 import { MdCloudUpload } from "react-icons/md";
-import { useUserDataContext } from "../contexts/userDataContext";
-
-const URL = "http://localhost:3000/users/picture"
+import { fetchUserData } from "../utils/fetchUserData";
 
 interface UserPictureReaderProps {
   closeForm: () => void
 }
 
 const UserPictureReader: React.FC<UserPictureReaderProps> = ({ closeForm }) => {
-
-  const { tokenData, fetchUserData, checkToken } = useUserDataContext()
 
   const [preview, setPreview] = useState("")
 
@@ -23,10 +19,7 @@ const UserPictureReader: React.FC<UserPictureReaderProps> = ({ closeForm }) => {
   const handleFile = (file: File) => {
     console.log(file)
     const fileIsValid = file.type.startsWith("image/") && file.type !== "image/gif" && file.type !== "image/webp"
-    if(!fileIsValid){
-      setError("File format not valid")
-      return
-    }
+    if(!fileIsValid) return setError("File format not valid")
     setError("")
     setFile(file)
     const reader = new FileReader()
@@ -50,31 +43,24 @@ const UserPictureReader: React.FC<UserPictureReaderProps> = ({ closeForm }) => {
   }
 
   const handleSubmit = async () => {
-    const tokenIsValid = await checkToken()
-    if(tokenIsValid){
-      if(!file){
-        setError("No file selected")
-        return
-      }
-      const formData = new FormData()
-      formData.append("profile_pic", file as File)
-      try{
-        const response = await fetch(URL, {
-          method: "PUT",
-          headers: {
-            "Authorization": `Bearer ${tokenData.value}`
-          },
-          body: formData
-        })
-        if(!response.ok) throw new Error("La respuesta no esta ok xd")
-        const data = await response.json()
-        if(data) console.log("data: ", data)
-        else console.log("No hay data xd")
-        fetchUserData()
-      } catch(error){
-        console.log("Hubo un error en handleSubmit: ", error)
-        setError("Failed to upload image")
-      }
+    if(!file) return setError("No file selected")
+    const formData = new FormData()
+    formData.append("profile_pic", file as File)
+    try{
+      const URL = "http://localhost:3000/users/edit-profile-pic"
+      const response = await fetch(URL, {
+        method: "PUT",
+        credentials: "include",
+        body: formData
+      })
+      const data = await response.json()
+      if(!response.ok) throw new Error(data.message)
+      console.log({data})
+      await fetchUserData()
+    } catch(error){
+      if(error instanceof Error) console.log(error.message)
+      else console.log("Picture update error", error)
+      setError("Failed to upload image")
     }
   }
 
