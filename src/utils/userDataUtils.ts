@@ -37,3 +37,9 @@ export const clearUserData = () => {
   localStorage.removeItem("email")
   localStorage.removeItem("profile_pic")
 }
+
+export const getUserId = () => {
+  const user_id = localStorage.getItem("userId") ?? null
+  if(user_id === null) throw new Error("userId is null")
+  else return parseInt(user_id)
+}

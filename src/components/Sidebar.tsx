@@ -5,12 +5,14 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { MdLogout } from "react-icons/md";
 import { clearUserData } from "../utils/userDataUtils";
+import { CurrentTasksType } from "../types";
 
 interface SidebarProps{
   setTokenIsValid: React.Dispatch<React.SetStateAction<boolean>>
+  setCurrentTasks: React.Dispatch<React.SetStateAction<CurrentTasksType>>
 }
 
-const Sidebar: React.FC<SidebarProps> = ({setTokenIsValid}) => {
+const Sidebar: React.FC<SidebarProps> = ({setTokenIsValid, setCurrentTasks}) => {
 
   const logout = async () => {
     const answer = confirm("Are you sure to log out?")
@@ -42,7 +44,10 @@ const Sidebar: React.FC<SidebarProps> = ({setTokenIsValid}) => {
         <FaTasks className="size-6"/>
         <p className="text-lg hidden md:flex">Today</p>
       </section>
-      <section className="flex items-center gap-3 pl-6 md:px-6 py-6 hover:bg-zinc-500 hover:pl-7 transition-all duration-200 ease-in-out">
+      <section
+        className="flex items-center gap-3 pl-6 md:px-6 py-6 hover:bg-zinc-500 hover:pl-7 transition-all duration-200 ease-in-out"
+        onClick={() => setCurrentTasks("tomorrow")}
+      >
         <IoArrowRedoSharp className="size-6"/>
         <p className="text-lg hidden md:flex">Tomorrow</p>
       </section>

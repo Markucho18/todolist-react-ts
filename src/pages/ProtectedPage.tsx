@@ -1,11 +1,16 @@
+import TasksTomorrow from "../components/TasksTomorrow"
+
 interface ProtectedPageProps{
+  currentTasks: string
 }
 
-const ProtectedPage: React.FC<ProtectedPageProps> = ({ }) => {
+const ProtectedPage: React.FC<ProtectedPageProps> = ({ currentTasks }) => {
+
+
 
   return (
     <div>
-      Pagina protegida(?) xdddd
+      {currentTasks === "tomorrow" && <TasksTomorrow /> }
     </div>
   )
 }

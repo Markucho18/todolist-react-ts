@@ -5,6 +5,7 @@ interface NewTaskButtonProps{
 }
 
 const NewTaskButton: React.FC<NewTaskButtonProps> = ({toggleModal}) => {
+
   return(
     <div className="relative flex-1 flex justify-end">
       <button

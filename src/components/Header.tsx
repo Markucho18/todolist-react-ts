@@ -1,6 +1,7 @@
 import SearchBar from "./SearchBar"
 import NewTaskButton from "./NewTaskButton"
 import { MdModeEditOutline } from "react-icons/md";
+import { useTasksContext } from "../contexts/TasksContext";
 
 interface HeaderProps {
   toggleTaskCreateModal: () => void
@@ -8,6 +9,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ toggleTaskCreateModal, toggleUserEditModal }) => {
+
+  const {tasks} = useTasksContext()
 
   return(
     <header className="flex items-center justify-center gap-4 w-full bg-zinc-700 px-2 sm:px-8 lg:px-12 pt-2 pb-4">
@@ -30,6 +33,7 @@ const Header: React.FC<HeaderProps> = ({ toggleTaskCreateModal, toggleUserEditMo
       <NewTaskButton
         toggleModal={toggleTaskCreateModal}
       />
+      <button onClick={() => console.log(tasks)}>showTasks</button>
     </header>
   )
 }

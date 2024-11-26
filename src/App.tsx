@@ -7,10 +7,15 @@ import RegisterPage from "./pages/RegisterPage"
 import ProtectedPage from "./pages/ProtectedPage"
 import UserEditModal from "./components/userEditModal"
 import TaskCreateModal from "./components/TaskCreateModal"
+//import UseReducerTest from "./components/UseReducerTest"
 import { validateToken } from "./utils/validateToken"
 import { fetchUserData } from "./utils/fetchUserData"
+import { CurrentTasksType } from "./types"
+import { useTasksContext } from "./contexts/TasksContext"
 
 const App: React.FC = () => {
+
+  const { setTasks } = useTasksContext()
 
   const [tokenIsValid, setTokenIsValid] = useState(false)
 
@@ -24,6 +29,7 @@ const App: React.FC = () => {
       setLoading(false)
     }
     checkToken()
+    setTasks()
   },[])
 
   const [userEditModal, setUserEditModal] = useState(false)
@@ -32,8 +38,11 @@ const App: React.FC = () => {
   const [taskCreateModal, setTaskCreateModal] = useState(false)
   const toggleTaskCreateModal = () => setTaskCreateModal(prev => !prev)
 
+  const [currentTasks, setCurrentTasks] = useState<CurrentTasksType>("inbox")
+
   return (
     <div className="flex flex-col bg-blue-200 w-full h-screen">
+      {/* <UseReducerTest /> */}
       {userEditModal && <UserEditModal toggleModal={toggleUserEditModal}/>}
       {taskCreateModal && <TaskCreateModal toggleModal={toggleTaskCreateModal}/> }
       {tokenIsValid && (
@@ -51,12 +60,17 @@ const App: React.FC = () => {
         </div>
       )}
       <main className="flex w-full h-full">
-        {tokenIsValid && <Sidebar setTokenIsValid={setTokenIsValid}/>}
+        {tokenIsValid && (
+          <Sidebar
+            setTokenIsValid={setTokenIsValid}
+            setCurrentTasks={setCurrentTasks}
+          />
+        )}
         <BrowserRouter>
           <Routes>
             <Route path="/" element={
               tokenIsValid
-              ? <ProtectedPage/> 
+              ? <ProtectedPage currentTasks={currentTasks}/> 
               : <Navigate to="/login"/>
             }></Route>
             <Route path="/login" element={
